@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "demo:test": "playwright test -c playwright.demo.config.ts",
     "demo:render": "node scripts/render-demo-video.mjs",
     "demo:flow": "npm run demo:test && npm run demo:render"

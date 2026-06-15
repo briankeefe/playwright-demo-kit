@@ -44,7 +44,7 @@ Main motivation:
 - regenerate same demo after UI changes
 - reuse same framework across many apps
 
-## What included
+## What's included
 
 - mobile-first demo config
 - slow motion capture
@@ -59,6 +59,17 @@ Main motivation:
 npm install
 npx playwright install chromium
 ```
+
+## Adopt in existing app
+
+1. copy `playwright.demo.config.ts`
+2. copy `tests/demo/helpers.ts`
+3. copy `scripts/render-demo-video.mjs`
+4. add package scripts from this repo
+5. set `PLAYWRIGHT_BASE_URL`
+6. optionally set `PLAYWRIGHT_DEMO_WEB_SERVER_COMMAND`
+7. replace `tests/demo/example.demo.spec.ts` with app flow
+8. run `npm run demo:test -- --list`
 
 ## Wire app
 
@@ -92,6 +103,15 @@ npm run demo:flow
 
 Then replace `tests/demo/example.demo.spec.ts` with app-specific walkthrough.
 
+## Verification
+
+```bash
+npm run typecheck
+npm run demo:test -- --list
+```
+
+GitHub Actions runs same checks on push and pull request.
+
 ## Demo pattern
 
 1. open page
@@ -107,3 +127,4 @@ Then replace `tests/demo/example.demo.spec.ts` with app-specific walkthrough.
 - Default capture tuned for tall mobile demos.
 - `ffmpeg` required for HQ mp4 render.
 - Template spec intentionally skipped until customized.
+- Repo intended to be used as GitHub template or copy source for other apps.

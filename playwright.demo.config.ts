@@ -16,16 +16,14 @@ const config: PlaywrightTestConfig = {
     baseURL,
     headless: false,
     trace: "retain-on-failure",
-    video: "on",
+    video: {
+      mode: "on",
+      size: recordVideoSize,
+    },
     viewport: mobileViewport,
-    screen: mobileViewport,
     deviceScaleFactor: 2,
     isMobile: true,
     hasTouch: true,
-    recordVideo: {
-      dir: "demo-artifacts",
-      size: recordVideoSize,
-    },
     launchOptions: {
       slowMo: 120,
     },
@@ -36,13 +34,12 @@ const config: PlaywrightTestConfig = {
       use: {
         browserName: "chromium",
         viewport: mobileViewport,
-        screen: mobileViewport,
         deviceScaleFactor: 2,
         isMobile: true,
         hasTouch: true,
         userAgent: devices["Pixel 7"].userAgent,
-        recordVideo: {
-          dir: "demo-artifacts",
+        video: {
+          mode: "on",
           size: recordVideoSize,
         },
       },
