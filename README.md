@@ -2,6 +2,48 @@
 
 Human-paced Playwright harness for polished product demos.
 
+## What this is for
+
+Use this when normal product screens exist, but demo experience still feels rough.
+
+This kit turns Playwright from test runner into repeatable demo runner:
+
+- opens app in controlled mobile viewport
+- moves through flow at human pace
+- shows clean on-screen cursor
+- adds short captions for story beats
+- records browser video automatically
+- renders higher-quality mp4 for sharing
+
+Good fit for:
+
+- founder demos
+- investor walkthroughs
+- sales enablement clips
+- product teasers
+- internal launch videos
+- repeatable QA demos across multiple apps
+
+## Why use it
+
+Raw screen recordings usually break down in same ways:
+
+- mouse moves too fast
+- important moments pass without context
+- clicks feel chaotic
+- narration becomes required to explain basics
+- every retake is manual and inconsistent
+
+This kit fixes that by making demo itself scripted, repeatable, and product-aware.
+
+Main motivation:
+
+- tell one clear story per flow
+- keep pacing deliberate
+- remove presenter shakiness
+- regenerate same demo after UI changes
+- reuse same framework across many apps
+
 ## What included
 
 - mobile-first demo config
