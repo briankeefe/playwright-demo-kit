@@ -112,6 +112,64 @@ npm run demo:test -- --list
 
 GitHub Actions runs same checks on push and pull request.
 
+## Desktop apps and dashboards
+
+Default capture is a tall mobile frame. For wide apps (dashboards, admin UIs) set:
+
+```bash
+export DEMO_DEVICE=desktop   # null viewport + maximized window, 1440x900 video
+export DEMO_SLOWMO=120       # optional, ms of slow motion
+```
+
+## Hiding dev-server error overlays
+
+Create React App / webpack-dev-server / Vite show a full-screen error overlay
+(e.g. "Uncaught runtime errors") that will dominate a demo. Kill it before the
+app loads:
+
+```ts
+import { dismissDevOverlays } from "./helpers";
+await dismissDevOverlays(page); // call before page.goto
+```
+
+It uses `!important` CSS (to beat the overlay's inline `display:block`) plus a
+short interval (because webpack-dev-server re-shows the overlay via a style flip
+that a childList MutationObserver misses). If you control the dev server, also
+consider disabling it at the source (`devServer.client.overlay = false`).
+
+## Skipping login (auth injection)
+
+Seed `localStorage` before load so the demo starts authenticated. Read secrets
+from env, never hardcode them:
+
+```ts
+import { injectLocalStorage } from "./helpers";
+await injectLocalStorage(page, {
+  TOKEN: process.env.DEMO_TOKEN ?? "",
+  CURRENT_LOCATION: process.env.DEMO_LOCATION ?? "",
+});
+```
+
+## Safety gate
+
+Stop a demo from firing against the wrong environment:
+
+```ts
+import { isSafeDemoTarget } from "./helpers";
+test.beforeEach(() => test.skip(!isSafeDemoTarget(), "set DEMO_CONFIRM=1 or use a localhost base URL"));
+```
+
+Safe when `DEMO_CONFIRM=1` or `PLAYWRIGHT_BASE_URL` is localhost. It only checks
+the frontend URL, not which database the backend points at, so still confirm the
+backend target yourself.
+
+## Caption vs locator collisions
+
+Captions render real text into the page, so `page.getByText("…")` can match a
+caption as well as the element you meant. Prefer role/`exact` locators
+(`getByRole("button", { name: "Save" })`, `getByText("Save", { exact: true })`)
+in steps that run while a caption is visible.
+
 ## Demo pattern
 
 1. open page

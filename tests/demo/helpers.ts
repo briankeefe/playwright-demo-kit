@@ -44,7 +44,7 @@ export async function typeSlow(locator: Locator, value: string) {
   await locator.click();
   await sleep(Pace.short);
   await locator.clear();
-  await locator.type(value, { delay: 100 });
+  await locator.pressSequentially(value, { delay: 100 });
   await sleep(Pace.medium);
 }
 
@@ -88,7 +88,7 @@ async function installCursor(page: Page) {
             transform: translate(-50%, -50%);
           }
         `;
-        document.head.appendChild(style);
+        (document.head || document.documentElement).appendChild(style);
       }
 
       if (!document.getElementById(cursorId)) {
@@ -137,7 +137,7 @@ export async function enableDemoCursor(page: Page) {
               transform: translate(-50%, -50%);
             }
           `;
-          document.head.appendChild(style);
+          (document.head || document.documentElement).appendChild(style);
         }
 
         if (!document.getElementById(cursorId)) {
@@ -203,7 +203,7 @@ async function installCaption(page: Page) {
             text-transform: uppercase;
           }
         `;
-        document.head.appendChild(style);
+        (document.head || document.documentElement).appendChild(style);
       }
       if (!document.getElementById(captionId)) {
         const caption = document.createElement("div");
@@ -261,7 +261,7 @@ export async function enableDemoCaptions(page: Page) {
               text-transform: uppercase;
             }
           `;
-          document.head.appendChild(style);
+          (document.head || document.documentElement).appendChild(style);
         }
         if (!document.getElementById(captionId)) {
           const caption = document.createElement("div");
@@ -329,6 +329,84 @@ export async function typeSlowDemo(page: Page, locator: Locator, value: string) 
   await locator.click();
   await sleep(Pace.short);
   await locator.clear();
-  await locator.type(value, { delay: 100 });
+  await locator.pressSequentially(value, { delay: 100 });
   await sleep(Pace.medium);
+}
+
+/**
+ * Continuously hide dev-server error overlays (Create React App / webpack-dev-server,
+ * Vite, React Refresh) so they never block or photobomb a demo.
+ *
+ * Why it is built this way:
+ * - Registered via addInitScript so it runs before app code / first error.
+ * - CSS uses !important to beat the overlay's inline display:block.
+ * - Appends to document.head || documentElement because head may not exist yet at init.
+ * - Re-applies on a short interval because webpack-dev-server re-shows the overlay by
+ *   flipping a style attribute, which a childList-only MutationObserver would miss.
+ *
+ * Prefer disabling the overlay at the dev-server config when you control it
+ * (e.g. webpack devServer.client.overlay = false); use this for servers you don't.
+ */
+export async function dismissDevOverlays(page: Page) {
+  await page.addInitScript(() => {
+    const STYLE_ID = "__pw-demo-overlay-kill";
+    const ensure = () => {
+      try {
+        const root = document.head || document.documentElement;
+        if (root && !document.getElementById(STYLE_ID)) {
+          const style = document.createElement("style");
+          style.id = STYLE_ID;
+          style.textContent =
+            "iframe[id*='overlay'],iframe[id*='error'],#react-refresh-overlay," +
+            "#webpack-dev-server-client-overlay{display:none!important;visibility:hidden!important;pointer-events:none!important}";
+          root.appendChild(style);
+        }
+        for (const frame of Array.from(document.querySelectorAll("iframe"))) {
+          const el = frame as HTMLElement;
+          const z = parseInt(el.style.zIndex || "0", 10);
+          if (/overlay|error/i.test(frame.id) || z >= 2_147_483_000) {
+            el.style.setProperty("display", "none", "important");
+            el.style.setProperty("pointer-events", "none", "important");
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    ensure();
+    setInterval(ensure, 150);
+  });
+}
+
+/**
+ * Inject localStorage values before the app loads (e.g. an auth token + current
+ * location), so a demo skips the login UI. Pull secrets from env, never hardcode.
+ *
+ *   await injectLocalStorage(page, {
+ *     TOKEN: process.env.DEMO_TOKEN ?? "",
+ *     CURRENT_LOCATION: process.env.DEMO_LOCATION ?? "",
+ *   });
+ */
+export async function injectLocalStorage(page: Page, values: Record<string, string>) {
+  await page.addInitScript((vals) => {
+    try {
+      for (const [key, value] of Object.entries(vals)) window.localStorage.setItem(key, value);
+    } catch {
+      /* storage may be unavailable on the initial about:blank */
+    }
+  }, values);
+}
+
+/**
+ * Guard so a demo never fires against an unintended (e.g. production) target.
+ * Safe when DEMO_CONFIRM=1, or when PLAYWRIGHT_BASE_URL points at localhost/127.0.0.1.
+ * Use at the top of a spec: test.skip(!isSafeDemoTarget(), "set DEMO_CONFIRM=1 …").
+ *
+ * Note: this only checks the frontend URL. It cannot tell which database the
+ * backend is connected to, so still confirm the backend target yourself.
+ */
+export function isSafeDemoTarget(): boolean {
+  if (process.env.DEMO_CONFIRM === "1") return true;
+  const url = process.env.PLAYWRIGHT_BASE_URL ?? "";
+  return /^(https?:\/\/)?(127\.0\.0\.1|localhost)(:|\/|$)/i.test(url);
 }
