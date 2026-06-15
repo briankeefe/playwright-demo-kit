@@ -112,12 +112,13 @@ npm run demo:test -- --list
 
 GitHub Actions runs same checks on push and pull request.
 
-## Desktop apps and dashboards
+## Viewport (desktop default)
 
-Default capture is a tall mobile frame. For wide apps (dashboards, admin UIs) set:
+Default capture is a maximized desktop window (null viewport, 1440x900 video),
+suited to dashboards and wide apps. For a tall phone frame instead, set:
 
 ```bash
-export DEMO_DEVICE=desktop   # null viewport + maximized window, 1440x900 video
+export DEMO_DEVICE=mobile    # 430x932 frame, Pixel 7 UA, touch
 export DEMO_SLOWMO=120       # optional, ms of slow motion
 ```
 
@@ -182,7 +183,7 @@ in steps that run while a caption is visible.
 
 ## Notes
 
-- Default capture tuned for tall mobile demos.
+- Default capture is a maximized desktop window; set `DEMO_DEVICE=mobile` for tall phone demos.
 - `ffmpeg` required for HQ mp4 render.
 - Template spec intentionally skipped until customized.
 - Repo intended to be used as GitHub template or copy source for other apps.

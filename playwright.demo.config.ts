@@ -4,8 +4,8 @@ const PORT = Number(process.env.PORT || 3000);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://127.0.0.1:${PORT}`;
 const webServerCommand = process.env.PLAYWRIGHT_DEMO_WEB_SERVER_COMMAND;
 
-// DEMO_DEVICE=desktop for dashboards / wide apps; defaults to a tall mobile frame.
-const isDesktop = (process.env.DEMO_DEVICE || "mobile").toLowerCase() === "desktop";
+// Desktop by default; set DEMO_DEVICE=mobile for a tall phone frame.
+const isDesktop = (process.env.DEMO_DEVICE || "desktop").toLowerCase() !== "mobile";
 const slowMo = Number(process.env.DEMO_SLOWMO || 120);
 
 const mobileViewport = { width: 430, height: 932 };
