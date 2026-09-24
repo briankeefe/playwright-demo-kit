@@ -90,8 +90,16 @@ Set `DEMO_SLUG` to the work being recorded (for example, `eng-2637`):
 DEMO_SLUG=eng-2637 npm run demo:flow
 ```
 
-Or run `DEMO_SLUG=eng-2637 npm run demo:test` followed by `npm run demo:render`.
+For separate ad-hoc full-suite test and render steps, run `DEMO_SLUG=eng-2637 npm run demo:test` followed by `npm run demo:render`. These two steps are not protected by one lock; use the single-feature command below for a shareable feature recording.
 The recording lock covers the entire `demo:flow` test and render. Another recording fails fast with the current slug and start time. The OS releases the lock after the recorder exits, even if its wrapper crashes, so there is no stale timeout. Keep the wrapper alive until capture completes; never delete the lock file (`~/Library/Caches/playwright-demo-kit/recording.lock`). This coordinates runs on the same machine, not recordings on other machines or commands that bypass the wrapper.
+
+For a single feature when multiple demo specs exist, select its spec and keep capture **and** rendering under one lock:
+
+```bash
+DEMO_SLUG=eng-2637 python3 scripts/with-recording-lock.py -- sh -c 'npx playwright test -c playwright.demo.config.ts tests/demo/<feature>.demo.spec.ts && npm run demo:render'
+```
+
+Replace `<feature>` with the actual spec name. `npm run demo:flow` runs every demo spec and renders the newest video. Do not use it for a single-feature recording unless that is the only selected spec. Confirm that both the frontend URL and its backend are safe for demo actions; do not record credentials or secrets.
 
 ## Files to copy into another app
 
