@@ -4,9 +4,9 @@
   "private": false,
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "demo:test": "playwright test -c playwright.demo.config.ts",
+    "demo:test": "python3 scripts/with-recording-lock.py -- npx playwright test -c playwright.demo.config.ts",
     "demo:render": "node scripts/render-demo-video.mjs",
-    "demo:flow": "npm run demo:test && npm run demo:render"
+    "demo:flow": "python3 scripts/with-recording-lock.py -- sh -c 'npx playwright test -c playwright.demo.config.ts && npm run demo:render'"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.2",

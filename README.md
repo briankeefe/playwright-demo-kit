@@ -65,11 +65,11 @@ npx playwright install chromium
 1. copy `playwright.demo.config.ts`
 2. copy `tests/demo/helpers.ts`
 3. copy `scripts/render-demo-video.mjs`
-4. add package scripts from this repo
+4. copy `scripts/with-recording-lock.py` and add package scripts from this repo
 5. set `PLAYWRIGHT_BASE_URL`
 6. optionally set `PLAYWRIGHT_DEMO_WEB_SERVER_COMMAND`
 7. replace `tests/demo/example.demo.spec.ts` with app flow
-8. run `npm run demo:test -- --list`
+8. run `DEMO_SLUG=check npm run demo:test -- --list`
 
 ## Wire app
 
@@ -84,22 +84,21 @@ If `PLAYWRIGHT_DEMO_WEB_SERVER_COMMAND` set, Playwright starts app for demo run.
 
 ## Run
 
-```bash
-npm run demo:test
-npm run demo:render
-```
-
-Or both:
+Set `DEMO_SLUG` to the work being recorded (for example, `eng-2637`):
 
 ```bash
-npm run demo:flow
+DEMO_SLUG=eng-2637 npm run demo:flow
 ```
+
+Or run `DEMO_SLUG=eng-2637 npm run demo:test` followed by `npm run demo:render`.
+The recording lock covers the entire `demo:flow` test and render. Another recording fails fast with the current slug and start time. The OS releases the lock after the recorder exits, even if its wrapper crashes, so there is no stale timeout. Keep the wrapper alive until capture completes; never delete the lock file (`~/Library/Caches/playwright-demo-kit/recording.lock`). This coordinates runs on the same machine, not recordings on other machines or commands that bypass the wrapper.
 
 ## Files to copy into another app
 
 - `playwright.demo.config.ts`
 - `tests/demo/helpers.ts`
 - `scripts/render-demo-video.mjs`
+- `scripts/with-recording-lock.py`
 
 Then replace `tests/demo/example.demo.spec.ts` with app-specific walkthrough.
 
@@ -107,7 +106,7 @@ Then replace `tests/demo/example.demo.spec.ts` with app-specific walkthrough.
 
 ```bash
 npm run typecheck
-npm run demo:test -- --list
+DEMO_SLUG=check npm run demo:test -- --list
 ```
 
 GitHub Actions runs same checks on push and pull request.

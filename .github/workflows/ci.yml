@@ -26,4 +26,4 @@ jobs:
         run: npm run typecheck
 
       - name: Validate demo config
-        run: npm run demo:test -- --list
+        run: DEMO_SLUG=ci npm run demo:test -- --list
